@@ -24,6 +24,11 @@ public class PostService {
 		return pao.selectPosts();
 	}
 	
+	public boolean updatePost(PostDTO pto)
+	{
+		return pao.updatePost(pto);
+	}
+	
 	public boolean deletePost(int post_id)
 	{
 		return pao.deletePost(post_id);

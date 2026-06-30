@@ -109,7 +109,31 @@ public class PostDAO {
 		return null;
 	}
 	
-	
+	public boolean updatePost(PostDTO pto)
+	{
+		String sql = "UPDATE posts SET title = ?, content = ? WHERE id = ?";
+		
+		try {
+			Connection conn = DBConnection.getConnection();
+			
+			PreparedStatement ps = conn.prepareStatement(sql);
+			
+			ps.setString(1, pto.getTitle());
+			ps.setString(2, pto.getContent());
+			ps.setInt(3, pto.getId());
+			
+			int result = ps.executeUpdate();
+			
+			if(result > 0)
+			{
+				return true;
+			}
+		}catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		return false;
+	}
 	
 	public boolean deletePost(int post_id)
 	{

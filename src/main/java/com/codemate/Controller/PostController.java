@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.codamate.Service.CommentService;
 import com.codamate.Service.PostService;
+import com.codemate.DTO.CommentDTO;
 import com.codemate.DTO.MemberDTO;
 import com.codemate.DTO.PostDTO;
 
@@ -24,6 +26,9 @@ public class PostController {
 	
 	@Autowired
 	PostService service; 
+	
+	@Autowired
+	CommentService c_service;
 	
 	@GetMapping("write")
 	public String GetPostWrite(
@@ -78,15 +83,33 @@ public class PostController {
 			)
 	{
 		PostDTO post = service.selectPostOne(post_id);
+		List<CommentDTO> comments = c_service.selectComment();
 		
 		model.addAttribute("post",post);
+		model.addAttribute("comments",comments);
 		
 		return "post/postDetail";
 	}
 	
 	@GetMapping("update")
-	public String GetPostUpdate(PostDTO pto)
+	public String GetPostUpdate(
+			@RequestAttribute("id") int post_id,
+			RedirectAttributes rttr,
+			Model model,
+			HttpSession session)
 	{
+		MemberDTO loginUser = (MemberDTO) session.getAttribute("loginUser");
+		
+		if(loginUser == null)
+		{
+			rttr.addFlashAttribute("msg","로그인이 필요합니다!");
+			return "redirect:/member/login";
+		}
+		
+		PostDTO post = service.selectPostOne(post_id);
+		
+		model.addAttribute("post", post);
+		
 		return "post/postUpdate";
 	}
 	
@@ -95,7 +118,18 @@ public class PostController {
 			PostDTO pto,
 			RedirectAttributes rttr)
 	{
+		boolean check = service.updatePost(pto);
 		
+		if(check)
+		{
+			rttr.addFlashAttribute("msg","수정 완료!");
+		}
+		else
+		{
+			rttr.addFlashAttribute("msg","수정 실패!");
+		}
+		
+		return "redirect:/post/detail?id=" + pto.getId();
 	}
 	
 	@GetMapping("delete")
@@ -114,6 +148,6 @@ public class PostController {
 			rttr.addFlashAttribute("msg","삭제 실패!");
 		}
 		
-		return "post/postDetail?id=" + id;
+		return "redirect:/post/postDetail?id=" + id;
 	}
 }
